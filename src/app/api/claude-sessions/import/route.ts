@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server';
 import { parseClaudeSession } from '@/lib/claude-session-parser';
 import { createSession, addMessage, updateSdkSessionId, getAllSessions } from '@/lib/db';
+import { deriveConversationTitle } from '@/lib/conversation-title';
+import { serverErrorResponse } from '@/lib/api-error';
+import { resolveAutomaticSessionRoute } from '@/lib/runtime/automatic-session-route';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,19 +47,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate title from the first user message
+    // Title from the first user message, via the same pure function as every
+    // other entry point. A foreign transcript's message may be empty or
+    // metadata-only once cleaned, so fall back to the project name.
     const firstUserMsg = messages.find(m => m.role === 'user');
-    const title = firstUserMsg
-      ? firstUserMsg.content.slice(0, 50) + (firstUserMsg.content.length > 50 ? '...' : '')
-      : `Imported: ${info.projectName}`;
+    const title = deriveConversationTitle(firstUserMsg?.content) || `Imported: ${info.projectName}`;
 
-    // Create a new CodePilot session
+    // Create a new CodePilot session. origin 'import': this title describes a
+    // conversation that happened elsewhere, so semantic re-generation must
+    // never touch it.
+    const route = resolveAutomaticSessionRoute('interactive_chat', { runtimeId: 'claude_code' });
     const session = createSession(
       title,
-      undefined, // model — will use default
+      route.modelId,
       undefined, // system prompt
       info.cwd || info.projectPath,
       'code',
+      route.providerId,
+      undefined, // permission profile
+      undefined, // source
+      'import',
+      {
+        runtimeId: 'claude_code',
+        state: 'bound',
+        source: 'legacy_runtime_ref',
+      },
     );
 
     // Store the original Claude Code SDK session ID so the conversation can be resumed
@@ -85,8 +100,6 @@ export async function POST(request: NextRequest) {
       },
     }, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.stack || error.message : String(error);
-    console.error('[POST /api/claude-sessions/import] Error:', message);
-    return Response.json({ error: message }, { status: 500 });
+    return serverErrorResponse('POST /api/claude-sessions/import', error);
   }
 }

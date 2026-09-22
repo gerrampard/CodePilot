@@ -1,8 +1,7 @@
 "use client";
 
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ZapIcon, Delete02Icon, GlobeIcon, FolderOpenIcon, Plug01Icon, Download04Icon } from "@hugeicons/core-free-icons";
-import { Badge } from "@/components/ui/badge";
+import { Lock, Trash } from "@/components/ui/icon";
+import { CodePilotIcon } from "@/components/ui/semantic-icon";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -11,14 +10,30 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
+import type { TranslationKey } from "@/i18n";
+
+export type SkillSource = "global" | "project" | "plugin" | "installed" | "sdk";
+export type SkillReadOnlyReason = "sdk" | "file_not_writable" | "out_of_cwd";
 
 export interface SkillItem {
   name: string;
   description: string;
   content: string;
-  source: "global" | "project" | "plugin" | "installed";
+  source: SkillSource;
   installedSource?: "agents" | "claude";
   filePath: string;
+  /**
+   * Whether this skill row is editable in the manager UI. Driven entirely
+   * by `/api/skills` (Phase 2D.1) — the client must not re-derive.
+   */
+  editable?: boolean;
+  /**
+   * Why a row is read-only; only present when `editable === false`.
+   */
+  readOnlyReason?: SkillReadOnlyReason;
+  /** Whether this plugin skill is loaded for the current session. */
+  loaded?: boolean;
 }
 
 interface SkillListItemProps {
@@ -34,11 +49,26 @@ export function SkillListItem({
   onSelect,
   onDelete,
 }: SkillListItemProps) {
+  const { t } = useTranslation();
   const [hovered, setHovered] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  // Server-driven: api/skills annotates editable + readOnlyReason. Default
+  // editable=true preserves the pre-2D.1 behavior for any code path that
+  // hasn't been re-fetched yet.
+  const editable = skill.editable !== false;
+  const readOnlyReasonKey: TranslationKey | null =
+    skill.readOnlyReason === "sdk"
+      ? "skills.readOnlyReason.sdk"
+      : skill.readOnlyReason === "file_not_writable"
+        ? "skills.readOnlyReason.fileNotWritable"
+        : skill.readOnlyReason === "out_of_cwd"
+          ? "skills.readOnlyReason.outOfCwd"
+          : null;
+
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!editable) return;
     if (confirmDelete) {
       onDelete(skill);
       setConfirmDelete(false);
@@ -64,42 +94,29 @@ export function SkillListItem({
         setConfirmDelete(false);
       }}
     >
-      <HugeiconsIcon icon={ZapIcon} className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <CodePilotIcon name="skill" size="md" className="shrink-0 text-muted-foreground" />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium truncate">/{skill.name}</span>
-          <Badge
-            variant="outline"
-            className={cn(
-              "text-[10px] px-1.5 py-0",
-              skill.source === "global"
-                ? "border-green-500/40 text-green-600 dark:text-green-400"
-                : skill.source === "installed"
-                  ? "border-orange-500/40 text-orange-600 dark:text-orange-400"
-                  : skill.source === "plugin"
-                    ? "border-indigo-500/40 text-indigo-600 dark:text-indigo-400"
-                    : "border-blue-500/40 text-blue-600 dark:text-blue-400"
-            )}
-          >
-            {skill.source === "global" ? (
-              <HugeiconsIcon icon={GlobeIcon} className="h-2.5 w-2.5 mr-0.5" />
-            ) : skill.source === "installed" ? (
-              <HugeiconsIcon icon={Download04Icon} className="h-2.5 w-2.5 mr-0.5" />
-            ) : skill.source === "plugin" ? (
-              <HugeiconsIcon icon={Plug01Icon} className="h-2.5 w-2.5 mr-0.5" />
-            ) : (
-              <HugeiconsIcon icon={FolderOpenIcon} className="h-2.5 w-2.5 mr-0.5" />
-            )}
-            {skill.source === "installed" && skill.installedSource
-              ? `installed:${skill.installedSource}`
-              : skill.source}
-          </Badge>
-        </div>
+        <span className="text-sm font-medium truncate block">/{skill.name}</span>
         <p className="text-xs text-muted-foreground truncate">
           {skill.description}
         </p>
       </div>
-      {(hovered || confirmDelete) && (
+      {/* Read-only badge: surfaces SDK / out-of-cwd / file-not-writable
+          reasons so users understand why delete isn't offered. */}
+      {!editable && readOnlyReasonKey && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              className="shrink-0 text-muted-foreground/70"
+              aria-label={t(readOnlyReasonKey)}
+            >
+              <Lock size={12} />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="right">{t(readOnlyReasonKey)}</TooltipContent>
+        </Tooltip>
+      )}
+      {editable && (hovered || confirmDelete) && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -108,11 +125,11 @@ export function SkillListItem({
               className="shrink-0"
               onClick={handleDelete}
             >
-              <HugeiconsIcon icon={Delete02Icon} className="h-3 w-3" />
+              <Trash size={12} />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            {confirmDelete ? "Click again to confirm" : "Delete"}
+            {confirmDelete ? t('skills.deleteConfirm') : t('common.delete')}
           </TooltipContent>
         </Tooltip>
       )}

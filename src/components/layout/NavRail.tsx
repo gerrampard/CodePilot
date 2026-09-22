@@ -2,18 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import { HugeiconsIcon } from "@hugeicons/react";
-import type { IconSvgElement } from "@hugeicons/react";
-import {
-  Message02Icon,
-  PlusSignIcon,
-  GridIcon,
-  Settings02Icon,
-  Moon02Icon,
-  Sun02Icon,
-} from "@hugeicons/core-free-icons";
+import { CodePilotIcon, type CodePilotIconName } from "@/components/ui/semantic-icon";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -21,63 +10,52 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
+import type { TranslationKey } from "@/i18n";
+
 
 interface NavRailProps {
   chatListOpen: boolean;
   onToggleChatList: () => void;
   hasUpdate?: boolean;
+  readyToInstall?: boolean;
   skipPermissionsActive?: boolean;
 }
 
-const navItems = [
-  { href: "/chat", label: "Chats", icon: Message02Icon },
-  { href: "/extensions", label: "Extensions", icon: GridIcon },
-  { href: "/settings", label: "Settings", icon: Settings02Icon },
+// Phase 2D.4 (2026-05-01): Skills / MCP / CLI Tools collapsed into a
+// single "Plugins" entry that routes to the unified ExtensionsPage.
+// Plug icon was the most generic of the three former icons and reads as
+// "extension" rather than any one tool.
+// Bridge moved into Settings as a sub-section (2026-05-02) — channel
+// configs are configuration, not a primary destination, so they no
+// longer earn a top-level rail entry.
+const navItems: ReadonlyArray<{ href: string; label: string; icon: CodePilotIconName }> = [
+  { href: "/chat", label: "Chats", icon: "chat" },
+  { href: "/plugins", label: "Plugins", icon: "plugin" },
+  { href: "/gallery", label: "Gallery", icon: "image" },
 ] as const;
 
-export function NavRail({ chatListOpen, onToggleChatList, hasUpdate, skipPermissionsActive }: NavRailProps) {
+export function NavRail({ onToggleChatList, hasUpdate, readyToInstall, skipPermissionsActive }: NavRailProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { t } = useTranslation();
+  const navLabelKeys: Record<string, TranslationKey> = {
+    'Chats': 'nav.chats',
+    'Plugins': 'nav.plugins',
+    'Gallery': 'gallery.title',
+  };
   const isChatRoute = pathname === "/chat" || pathname.startsWith("/chat/");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isSettingsActive = pathname === "/settings" || pathname.startsWith("/settings/");
 
   return (
-    <aside className="flex w-14 shrink-0 flex-col items-center bg-sidebar pb-3 pt-10">
-      {/* New Chat */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            className="mb-2 h-9 w-9"
-          >
-            <Link href="/chat">
-              <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4" />
-              <span className="sr-only">New Chat</span>
-            </Link>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="right">New Chat</TooltipContent>
-      </Tooltip>
-
-      {/* Divider */}
-      <div className="mx-auto mb-2 h-px w-6 bg-border/50" />
-
+    <aside className="flex w-14 shrink-0 flex-col items-center bg-sidebar/80 backdrop-blur-xl pb-3 pt-10">
       {/* Nav icons */}
       <nav className="flex flex-1 flex-col items-center gap-1">
         {navItems.map((item) => {
           const isActive =
             item.href === "/chat"
               ? pathname === "/chat" || pathname.startsWith("/chat/")
-              : item.href === "/extensions"
-                ? pathname.startsWith("/extensions")
-                : pathname === item.href || pathname.startsWith(item.href + "?");
+              : pathname === item.href || pathname.startsWith(item.href + "/") || pathname.startsWith(item.href + "?");
 
           return (
             <Tooltip key={item.href}>
@@ -100,8 +78,8 @@ export function NavRail({ chatListOpen, onToggleChatList, hasUpdate, skipPermiss
                       }
                     }}
                   >
-                    <HugeiconsIcon icon={item.icon} className="h-4 w-4" />
-                    <span className="sr-only">{item.label}</span>
+                    <CodePilotIcon name={item.icon} size="md" strokeWidth={isActive ? 2 : undefined} className="text-inherit" aria-hidden />
+                    <span className="sr-only">{t(navLabelKeys[item.label] ?? item.label as TranslationKey)}</span>
                   </Button>
                 ) : (
                   <div className="relative">
@@ -115,59 +93,61 @@ export function NavRail({ chatListOpen, onToggleChatList, hasUpdate, skipPermiss
                       )}
                     >
                       <Link href={item.href}>
-                        <HugeiconsIcon icon={item.icon} className="h-4 w-4" />
-                        <span className="sr-only">{item.label}</span>
+                        <CodePilotIcon name={item.icon} size="md" strokeWidth={isActive ? 2 : undefined} className="text-inherit" aria-hidden />
+                        <span className="sr-only">{t(navLabelKeys[item.label] ?? item.label as TranslationKey)}</span>
                       </Link>
                     </Button>
-                    {item.href === "/settings" && hasUpdate && (
-                      <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-blue-500" />
-                    )}
                   </div>
                 )}
               </TooltipTrigger>
-              <TooltipContent side="right">{item.label}</TooltipContent>
+              <TooltipContent side="right">{t(navLabelKeys[item.label] ?? item.label as TranslationKey)}</TooltipContent>
             </Tooltip>
           );
         })}
       </nav>
 
-      {/* Bottom: skip-permissions indicator + theme toggle */}
+      {/* Bottom: skip-permissions indicator + settings */}
       <div className="mt-auto flex flex-col items-center gap-2">
         {skipPermissionsActive && (
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex h-8 w-8 items-center justify-center">
                 <span className="relative flex h-3 w-3">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
-                  <span className="relative inline-flex h-3 w-3 rounded-full bg-orange-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-status-warning opacity-75" />
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-status-warning" />
                 </span>
               </div>
             </TooltipTrigger>
-            <TooltipContent side="right">Auto-approve is ON</TooltipContent>
+            <TooltipContent side="right">{t('nav.autoApproveOn')}</TooltipContent>
           </Tooltip>
         )}
-        {mounted && (
-          <Tooltip>
-            <TooltipTrigger asChild>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="relative">
               <Button
+                asChild
                 variant="ghost"
                 size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="h-8 w-8"
-              >
-                {theme === "dark" ? (
-                  <HugeiconsIcon icon={Sun02Icon} className="h-4 w-4" />
-                ) : (
-                  <HugeiconsIcon icon={Moon02Icon} className="h-4 w-4" />
+                className={cn(
+                  "h-9 w-9",
+                  isSettingsActive && "bg-sidebar-accent text-sidebar-accent-foreground"
                 )}
-                <span className="sr-only">Toggle theme</span>
+              >
+                <Link href="/settings">
+                  <CodePilotIcon name="settings" size="md" strokeWidth={isSettingsActive ? 2 : undefined} className="text-inherit" aria-hidden />
+                  <span className="sr-only">{t('nav.settings')}</span>
+                </Link>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              {theme === "dark" ? "Light mode" : "Dark mode"}
-            </TooltipContent>
-          </Tooltip>
-        )}
+              {hasUpdate && (
+                <span className={cn(
+                  "absolute top-0.5 right-0.5 h-2 w-2 rounded-full",
+                  readyToInstall ? "bg-status-success animate-pulse" : "bg-primary"
+                )} />
+              )}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right">{t('nav.settings')}</TooltipContent>
+        </Tooltip>
       </div>
     </aside>
   );

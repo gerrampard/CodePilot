@@ -4,7 +4,8 @@ import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowDownIcon, DownloadIcon } from "lucide-react";
+import { ArrowDown } from "@phosphor-icons/react";
+import { CodePilotIcon } from "@/components/ui/semantic-icon";
 import { useCallback } from "react";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
@@ -13,7 +14,14 @@ export type ConversationProps = ComponentProps<typeof StickToBottom>;
 export const Conversation = ({ className, ...props }: ConversationProps) => (
   <StickToBottom
     className={cn("relative flex-1 overflow-y-hidden", className)}
-    initial="smooth"
+    // Phase 2 ① — `initial` governs the FIRST scroll-to-bottom when the
+    // transcript mounts (use-stick-to-bottom uses `initial` on the first
+    // ResizeObserver tick, `resize` on every later one). `smooth` made
+    // opening a history session visibly animate-scroll from top to bottom
+    // for ~0.5s; `instant` jumps straight to the latest message with no
+    // visible animation. `resize` stays untouched so new-message append /
+    // live streaming keep their existing behavior.
+    initial="instant"
     resize="instant"
     role="log"
     {...props}
@@ -94,7 +102,7 @@ export const ConversationScrollButton = ({
         variant="outline"
         {...props}
       >
-        <ArrowDownIcon className="size-4" />
+        <ArrowDown className="size-4" />
       </Button>
     )
   );
@@ -161,7 +169,7 @@ export const ConversationDownload = ({
       variant="outline"
       {...props}
     >
-      {children ?? <DownloadIcon className="size-4" />}
+      {children ?? <CodePilotIcon name="download" size="md" aria-hidden />}
     </Button>
   );
 };

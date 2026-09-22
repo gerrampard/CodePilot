@@ -1,233 +1,293 @@
 <img src="docs/icon-readme.png" width="32" height="32" alt="CodePilot" style="vertical-align: middle; margin-right: 8px;" /> CodePilot
 ===
 
-**A native desktop GUI for Claude Code** -- chat, code, and manage projects through a polished visual interface instead of the terminal.
+**A multi-model AI agent desktop client** -- connect any AI provider, extend with MCP & skills, control from your phone, and let your assistant learn your workflow.
 
 [![GitHub release](https://img.shields.io/github/v/release/op7418/CodePilot)](https://github.com/op7418/CodePilot/releases)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](https://github.com/op7418/CodePilot/releases)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/op7418/CodePilot/total)](https://github.com/op7418/CodePilot/releases)
+[![GitHub stars](https://img.shields.io/github/stars/op7418/CodePilot)](https://github.com/op7418/CodePilot/stargazers)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/op7418/CodePilot/releases)
+[![License](https://img.shields.io/badge/license-BSL--1.1-orange)](LICENSE)
 
-[中文文档](./README_CN.md)
-
----
-
-## Features
-
-- **💬 Conversational coding** -- Stream responses from Claude in real time with full Markdown rendering, syntax-highlighted code blocks, and tool-call visualization.
-- **📂 Session management** -- Create, rename, archive, and resume chat sessions. Conversations are persisted locally in SQLite so nothing is lost between restarts.
-- **🎯 Project-aware context** -- Pick a working directory per session. The right panel shows a live file tree and file previews so you always know what Claude is looking at.
-- **🔒 Permission controls** -- Approve, deny, or auto-allow tool use on a per-action basis. Choose between permission modes to match your comfort level.
-- **🎭 Multiple interaction modes** -- Switch between *Code*, *Plan*, and *Ask* modes to control how Claude behaves in each session.
-- **🤖 Model selector** -- Switch between Claude models (Opus, Sonnet, Haiku) mid-conversation.
-- **🔌 MCP server management** -- Add, configure, and remove Model Context Protocol servers directly from the Extensions page. Supports `stdio`, `sse`, and `http` transport types.
-- **⚡ Custom skills** -- Define reusable prompt-based skills (global or per-project) that can be invoked as slash commands during chat.
-- **⚙️ Settings editor** -- Visual and JSON editors for your `~/.claude/settings.json`, including permissions and environment variables.
-- **📊 Token usage tracking** -- See input/output token counts and estimated cost after every assistant response.
-- **🌗 Dark / Light theme** -- One-click theme toggle in the navigation rail.
-- **⌨️ Slash commands** -- Built-in commands like `/help`, `/clear`, `/cost`, `/compact`, `/doctor`, `/review`, and more.
-- **🖥️ Electron packaging** -- Ships as a native desktop app with a hidden title bar, bundled Next.js server, and automatic port allocation.
+[中文文档](./README_CN.md) | [日本語](./README_JA.md)
 
 ---
 
-## Screenshots
+![CodePilot](apps/site/public/screenshots/en/chat-window.webp)
 
-![CodePilot](docs/screenshot.png)
+<details>
+<summary>More of the current interface</summary>
+
+| Skills and extensions | Connect AI services |
+| --- | --- |
+| ![Skills and extensions](apps/site/public/screenshots/en/plugins-window.webp) | ![Connect AI services](apps/site/public/screenshots/en/providers-window.webp) |
+
+</details>
 
 ---
 
-## Prerequisites
-
-> **Important**: CodePilot calls the Claude Code Agent SDK under the hood. Make sure `claude` is available on your `PATH` and that you have authenticated (`claude login`) before launching the app.
-
-| Requirement | Minimum version |
-|---|---|
-| **Node.js** | 18+ |
-| **Claude Code CLI** | Installed and authenticated (`claude --version` should work) |
-| **npm** | 9+ (ships with Node 18) |
+[Download](#download) | [Quick Start](#quick-start) | [Documentation](#documentation) | [Contributing](#contributing) | [Community](#community)
 
 ---
 
 ## Download
 
-Pre-built releases are available on the [**Releases**](https://github.com/op7418/CodePilot/releases) page.
+| Platform | Download | Architecture |
+|---|---|---|
+| macOS | [Apple Silicon (.dmg)](https://github.com/op7418/CodePilot/releases/latest) · [Intel (.dmg)](https://github.com/op7418/CodePilot/releases/latest) | arm64 / x64 |
+| Windows | [Installer (.exe)](https://github.com/op7418/CodePilot/releases/latest) | x64 |
+| Linux | [AppImage / deb / rpm](https://github.com/op7418/CodePilot/releases/latest) | x64 / arm64 |
 
-### Supported Platforms
+Official macOS stable builds can check, download, and install signed updates in the app. After manually installing the first supported Windows version, later Windows releases can update in the app using unsigned packages from the official GitHub Release; Linux releases remain manual downloads.
 
-- **macOS**: Universal binary (arm64 + x64) distributed as `.dmg`
-- **Windows**: x64 distributed as `.zip`
-- **Linux**: x64 and arm64 distributed as `.AppImage`, `.deb`, and `.rpm`
+Or visit the [Releases](https://github.com/op7418/CodePilot/releases) page for all versions.
+
+---
+
+## Why CodePilot
+
+### Multi-provider, one interface
+
+Connect to **17+ AI providers** out of the box. Switch providers and models mid-conversation without losing context.
+
+| Category | Providers |
+|---|---|
+| Direct API | Anthropic, OpenRouter |
+| Cloud platforms | AWS Bedrock, Google Vertex AI |
+| Chinese AI providers | Zhipu GLM (CN/Global), Kimi, Moonshot, MiniMax (CN/Global), Volcengine Ark (Doubao), Xiaomi MiMo, Aliyun Bailian (Qwen) |
+| Local & self-hosted | Ollama, LiteLLM |
+| Custom | Any Anthropic-compatible or OpenAI-compatible endpoint |
+| Media | Google Gemini (image generation) |
+
+### Beyond coding — a full AI agent
+
+CodePilot started as a coding tool but has grown into a **general-purpose AI agent desktop**:
+
+- **Assistant Workspace** — Persona files, persistent memory, onboarding flows, and daily check-ins. Your assistant learns your preferences and adapts over time.
+- **Generative UI** — AI can create interactive dashboards, charts, and visual widgets rendered live in-app.
+- **Remote Bridge** — Connect to Telegram, Feishu, Discord, QQ, and WeChat. Send messages from your phone, get responses on your desktop.
+- **MCP + Skills** — Add MCP servers (stdio / sse / http) with runtime monitoring. Define reusable skills or install from the skills.sh marketplace.
+- **Media Studio** — AI image generation with batch tasks, gallery, and tagging.
+- **Task Scheduler** — Schedule recurring tasks with cron expressions or intervals.
+
+### Built for daily use
+
+- Pause, resume, and **rewind sessions to any checkpoint**
+- **Split-screen** dual sessions side by side
+- Track **token usage and costs** with daily charts
+- Import Claude Code CLI session history
+- Dark / Light theme toggle
+- English + Chinese interface
 
 ---
 
 ## Quick Start
 
-```bash
-# Clone the repository
-git clone https://github.com/op7418/CodePilot.git
-cd codepilot
+### Path A: Download a release (most users)
 
-# Install dependencies
-npm install
+1. Download the installer for your platform from the [Download](#download) section above
+2. Launch CodePilot
+3. **Configure a Provider** in **Settings > Providers** — add your API key for any supported provider
+4. Start a conversation
 
-# Start in development mode (browser)
-npm run dev
+> **Note:** Installing the [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code/overview) (`npm install -g @anthropic-ai/claude-code`) unlocks additional capabilities like direct file editing, terminal commands, and git operations. It is recommended but not required for basic chat.
 
-# -- or start the full Electron app in dev mode --
-npm run electron:dev
-```
+### Path B: Build from source (developers)
 
-Then open [http://localhost:3000](http://localhost:3000) (browser mode) or wait for the Electron window to appear.
-
----
-
-## Installation Troubleshooting
-
-CodePilot is not code-signed yet, so your operating system will display a security warning the first time you open it.
-
-### macOS
-
-You will see a dialog that says **"Apple cannot check it for malicious software"**.
-
-**Option 1 -- Right-click to open**
-
-1. Right-click (or Control-click) `CodePilot.app` in Finder.
-2. Select **Open** from the context menu.
-3. Click **Open** in the confirmation dialog.
-
-**Option 2 -- System Settings**
-
-1. Open **System Settings** > **Privacy & Security**.
-2. Scroll down to the **Security** section.
-3. You will see a message about CodePilot being blocked. Click **Open Anyway**.
-4. Authenticate if prompted, then launch the app.
-
-**Option 3 -- Terminal command**
-
-```bash
-xattr -cr /Applications/CodePilot.app
-```
-
-This strips the quarantine attribute so macOS will no longer block the app.
-
-### Windows
-
-Windows SmartScreen will block the installer or executable.
-
-**Option 1 -- Run anyway**
-
-1. On the SmartScreen dialog, click **More info**.
-2. Click **Run anyway**.
-
-**Option 2 -- Disable App Install Control**
-
-1. Open **Settings** > **Apps** > **Advanced app settings**.
-2. Toggle **App Install Control** (or "Choose where to get apps") to allow apps from anywhere.
-
----
-
-## Tech Stack
-
-| Layer | Technology |
+| Prerequisite | Minimum version |
 |---|---|
-| Framework | [Next.js 16](https://nextjs.org/) (App Router) |
-| Desktop shell | [Electron 40](https://www.electronjs.org/) |
-| UI components | [Radix UI](https://www.radix-ui.com/) + [shadcn/ui](https://ui.shadcn.com/) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com/) |
-| Animation | [Motion](https://motion.dev/) (Framer Motion) |
-| AI integration | [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk) |
-| Database | [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) (embedded, per-user) |
-| Markdown | react-markdown + remark-gfm + rehype-raw + [Shiki](https://shiki.style/) |
-| Streaming | [Vercel AI SDK](https://sdk.vercel.ai/) helpers + Server-Sent Events |
-| Icons | [Hugeicons](https://hugeicons.com/) + [Lucide](https://lucide.dev/) |
-| Testing | [Playwright](https://playwright.dev/) |
-| Build / Pack | electron-builder + esbuild |
-
----
-
-## Project Structure
-
-```
-codepilot/
-├── electron/                # Electron main process & preload
-│   ├── main.ts              # Window creation, embedded server lifecycle
-│   └── preload.ts           # Context bridge
-├── src/
-│   ├── app/                 # Next.js App Router pages & API routes
-│   │   ├── chat/            # New-chat page & [id] session page
-│   │   ├── extensions/      # Skills + MCP server management
-│   │   ├── settings/        # Settings editor
-│   │   └── api/             # REST + SSE endpoints
-│   │       ├── chat/        # Sessions, messages, streaming, permissions
-│   │       ├── files/       # File tree & preview
-│   │       ├── plugins/     # Plugin & MCP CRUD
-│   │       ├── settings/    # Settings read/write
-│   │       ├── skills/      # Skill CRUD
-│   │       └── tasks/       # Task tracking
-│   ├── components/
-│   │   ├── ai-elements/     # Message bubbles, code blocks, tool calls, etc.
-│   │   ├── chat/            # ChatView, MessageList, MessageInput, streaming
-│   │   ├── layout/          # AppShell, NavRail, Header, RightPanel
-│   │   ├── plugins/         # MCP server list & editor
-│   │   ├── project/         # FileTree, FilePreview, TaskList
-│   │   ├── skills/          # SkillsManager, SkillEditor
-│   │   └── ui/              # Radix-based primitives (button, dialog, tabs, ...)
-│   ├── hooks/               # Custom React hooks (usePanel, ...)
-│   ├── lib/                 # Core logic
-│   │   ├── claude-client.ts # Agent SDK streaming wrapper
-│   │   ├── db.ts            # SQLite schema, migrations, CRUD
-│   │   ├── files.ts         # File system helpers
-│   │   ├── permission-registry.ts  # Permission request/response bridge
-│   │   └── utils.ts         # Shared utilities
-│   └── types/               # TypeScript interfaces & API contracts
-├── electron-builder.yml     # Packaging configuration
-├── package.json
-└── tsconfig.json
-```
-
----
-
-## Development
+| Node.js | 18+ |
+| npm | 9+ (ships with Node 18) |
 
 ```bash
-# Run Next.js dev server only (opens in browser)
-npm run dev
-
-# Run the full Electron app in dev mode
-# (starts Next.js + waits for it, then opens Electron)
-npm run electron:dev
-
-# Production build (Next.js static export)
-npm run build
-
-# Build Electron distributable + Next.js
-npm run electron:build
-
-# Package macOS DMG (universal binary)
-npm run electron:pack
+git clone https://github.com/op7418/CodePilot.git
+cd CodePilot
+npm install
+npm run dev              # browser mode at http://localhost:3000
+# -- or --
+npm run electron:dev     # full desktop app
 ```
 
-### Notes
+---
 
-- The Electron main process (`electron/main.ts`) forks the Next.js standalone server and connects to it over `127.0.0.1` with a random free port.
-- Chat data is stored in `~/.codepilot/codepilot.db` (or `./data/codepilot.db` in dev mode).
-- The app uses WAL mode for SQLite, so concurrent reads are fast.
+## Core Capabilities
+
+### Conversation & Interaction
+
+| Capability | Details |
+|---|---|
+| Interaction modes | Code / Plan / Ask |
+| Reasoning effort | Low / Medium / High / Max + Thinking mode |
+| Permission control | Default / Full Access, per-action approval |
+| Session control | Pause, resume, rewind to checkpoint, archive |
+| Model switching | Change model mid-conversation |
+| Split screen | Side-by-side dual sessions |
+| Attachments | Files and images with multimodal vision support |
+| Slash commands | /help /clear /cost /compact /doctor /review and more |
+
+### Extensions & Integrations
+
+| Capability | Details |
+|---|---|
+| Providers | 17+ providers: Anthropic, OpenRouter, Bedrock, Vertex, Zhipu GLM, Kimi, Moonshot, MiniMax, Volcengine, MiMo, Bailian, Ollama, LiteLLM, custom endpoints |
+| MCP servers | stdio / sse / http, runtime status monitoring |
+| Skills | Custom / project / global skills, skills.sh marketplace |
+| Bridge | Telegram / Feishu / Discord / QQ / WeChat remote control |
+| CLI import | Import Claude Code CLI .jsonl session history |
+| Image generation | Gemini image gen, batch tasks, gallery |
+
+### Data & Workspace
+
+| Capability | Details |
+|---|---|
+| Assistant Workspace | Persona files (soul.md, user.md, claude.md, memory.md), onboarding, daily check-ins, persistent memory |
+| Generative UI | AI-created interactive dashboards and visual widgets |
+| File browser | Project file tree with syntax-highlighted preview |
+| Git panel | Status, branches, commits, worktree management |
+| Usage analytics | Token counts, cost estimates, daily usage charts |
+| Task scheduler | Cron-based and interval scheduling with persistence |
+| Local storage | SQLite (WAL mode), all data stays on your machine |
+| i18n | English + Chinese |
+| Themes | Dark / Light, one-click toggle |
+
+---
+
+## First Launch
+
+1. **Configure a Provider** — Go to **Settings > Providers** and add credentials for the provider you want to use. CodePilot includes presets for all major providers — just pick one and enter your API key.
+2. **Create a conversation** — Pick a working directory, select a mode (Code / Plan / Ask), and choose a model.
+3. **Set up Assistant Workspace** (optional) — Go to **Settings > Assistant**, choose a workspace directory, and enable Onboarding. CodePilot creates `soul.md`, `user.md`, `claude.md`, and `memory.md` at the workspace root.
+4. **Add MCP servers** (optional) — Go to the **MCP** page in the sidebar to add and manage MCP servers. Custom skills are managed on the separate **Skills** page.
+5. **Install Claude Code CLI** (optional) — For advanced features like file editing and terminal commands, install the CLI: `npm install -g @anthropic-ai/claude-code`
+
+---
+
+## Platform & Installation Notes
+
+macOS stable builds are signed with Developer ID, notarized, stapled, and verified by Gatekeeper. If macOS reports that the developer cannot be verified or the file is damaged, stop and report it instead of bypassing the warning. Windows builds are unsigned and may show SmartScreen. After manually installing the first Windows updater-capable release, later stable versions can update in-app from the official `op7418/CodePilot` GitHub Release; the app verifies the metadata SHA-512 but does not claim independent Authenticode publisher verification. Linux updates remain manual.
+
+<details>
+<summary>macOS: Gatekeeper rejects the download</summary>
+
+1. Delete the rejected copy and download it again from the official GitHub Release.
+2. Verify the file against `SHA256SUMS.txt` from the same Release.
+3. If Gatekeeper still rejects it, do not remove quarantine attributes or bypass the warning; report the macOS version, download URL, and checksum on GitHub Issues.
+
+</details>
+
+<details>
+<summary>Windows: SmartScreen blocks the installer</summary>
+
+Verify the installer against `SHA256SUMS.txt` from the same official Release first. If the checksum matches and the source is `op7418/CodePilot`, click "More info", then "Run anyway". If organization policy removes that option, contact the device administrator instead of weakening system-wide protection.
+</details>
+
+---
+
+## Documentation
+
+📖 **Full documentation:** [English](https://www.codepilot.sh/docs) | [中文](https://www.codepilot.sh/zh/docs)
+
+**Getting started:**
+- [Quick Start](#quick-start) -- Download or build from source
+- [First Launch](#first-launch) -- Provider setup, workspace configuration
+- [Installation Guide](https://www.codepilot.sh/docs/installation) -- Detailed setup instructions
+
+**User guides:**
+- [Providers](https://www.codepilot.sh/docs/providers) -- Configuring AI providers and custom endpoints
+- [MCP Servers](https://www.codepilot.sh/docs/mcp) -- Adding and managing Model Context Protocol servers
+- [Skills](https://www.codepilot.sh/docs/skills) -- Custom skills, project skills, and the skills.sh marketplace
+- [Bridge](https://www.codepilot.sh/docs/bridge) -- Remote control via Telegram, Feishu, Discord, QQ, WeChat
+- [Assistant Workspace](https://www.codepilot.sh/docs/assistant-workspace) -- Persona files, onboarding, memory, daily check-ins
+- [FAQ](https://www.codepilot.sh/docs/faq) -- Common issues and solutions
+
+**Developer docs:**
+- [ARCHITECTURE.md](./ARCHITECTURE.md) -- Architecture, tech stack, directory structure, data flow
+- [docs/handover/](./docs/handover/) -- Design decisions and handover documents
+- [docs/exec-plans/](./docs/exec-plans/) -- Execution plans and tech debt tracker
+
+---
+
+## FAQ
+
+<details>
+<summary>Do I need the Claude Code CLI?</summary>
+
+No. You can use CodePilot with any supported provider (OpenRouter, Zhipu GLM, Volcengine, Ollama, etc.) without the Claude Code CLI. The CLI is only needed if you want Claude to directly edit files, run terminal commands, or use git operations on your machine. For chat and assistant features, just configure a provider and start a conversation.
+</details>
+
+<details>
+<summary>Configured a Provider but no models appear</summary>
+
+Verify the API key is valid and the endpoint is reachable. Some providers (Bedrock, Vertex) require additional environment variables or IAM configuration beyond the API key. Use the built-in diagnostics (**Settings > Providers > Run Diagnostics**) to check connectivity.
+</details>
+
+<details>
+<summary>What is the difference between <code>npm run dev</code> and <code>npm run electron:dev</code>?</summary>
+
+`npm run dev` starts only the Next.js dev server -- you use CodePilot in your browser at `http://localhost:3000`. `npm run electron:dev` starts both Next.js and the Electron shell, giving you the full desktop app experience with native window controls.
+</details>
+
+<details>
+<summary>Where are the Assistant Workspace files?</summary>
+
+When you set up a workspace, CodePilot creates four Markdown files at the **workspace root directory**: `soul.md` (personality), `user.md` (user profile), `claude.md` (rules), and `memory.md` (long-term notes). State tracking (onboarding progress, check-in dates) is stored in the `.assistant/` subdirectory. Daily memories go to `memory/daily/`.
+</details>
+
+<details>
+<summary>Bridge requires additional setup per platform</summary>
+
+Each Bridge channel (Telegram, Feishu, Discord, QQ, WeChat) requires its own bot token or app credentials. Go to the **Bridge** page in the sidebar to configure channels. You will need to create a bot on the target platform first and provide the token to CodePilot.
+</details>
+
+---
+
+## Community
+
+<img src="docs/wechat-group-qr.png" width="240" alt="WeChat Group QR Code" />
+
+Scan the QR code to join the WeChat user group for discussions, feedback, and updates.
+
+- [GitHub Issues](https://github.com/op7418/CodePilot/issues) -- Bug reports and feature requests
+- [GitHub Discussions](https://github.com/op7418/CodePilot/discussions) -- Questions and general discussion
 
 ---
 
 ## Contributing
 
-Contributions are welcome. To get started:
+1. Fork the repository and create a feature branch
+2. `npm install` and `npm run electron:dev` to develop locally
+3. Run `npm run test` before opening a PR
+4. Submit a PR against `main` with a clear description
 
-1. Fork the repository and create a feature branch.
-2. Install dependencies with `npm install`.
-3. Run `npm run electron:dev` to test your changes locally.
-4. Make sure `npm run lint` passes before opening a pull request.
-5. Open a PR against `main` with a clear description of what changed and why.
+Keep PRs focused -- one feature or fix per pull request.
 
-Please keep PRs focused -- one feature or fix per pull request.
+<details>
+<summary>Development commands</summary>
+
+```bash
+npm run dev                    # Next.js dev server (browser)
+npm run electron:dev           # Full Electron app (dev mode)
+npm run build                  # Production build
+npm run electron:build         # Build Electron distributable
+npm run electron:pack:mac      # macOS DMG (arm64 + x64)
+npm run electron:pack:win      # Windows NSIS installer
+npm run electron:pack:linux    # Linux AppImage, deb, rpm
+```
+
+**CI/CD:** Pushing a stable `vX.Y.Z` tag builds signed/notarized macOS arm64, x64, and universal packages plus `latest-mac.yml`; an unsigned Windows x64 NSIS updater plus `latest.yml`; and Linux arm64/x64 manual packages. The Release is made public only after signing/notarization where applicable, packaged health, checksum, attestation, Intel ABI, GitHub single-trust-root safeguards, and complete asset-graph checks pass. The unsigned Windows trust gate requires a fresh administrator audit of immutable Releases and no-bypass branch/tag rulesets; Actions compares the live ruleset IDs and update timestamps with that audit and fails closed on drift. Windows publishes an EXE blockmap for opportunistic differential updates with full-installer fallback; Linux updater metadata is intentionally not published.
+
+**Notes:**
+- Electron forks a Next.js standalone server on `127.0.0.1` with a random free port
+- Chat data is stored in `~/.codepilot/codepilot.db` (dev mode: `./data/`)
+- SQLite uses WAL mode for fast concurrent reads
+</details>
 
 ---
 
 ## License
 
-MIT
+[Business Source License 1.1 (BSL-1.1)](LICENSE)
+
+- **Personal / academic / non-profit use**: free and unrestricted
+- **Commercial use**: requires a separate license — contact [@op7418 on X](https://x.com/op7418)
+- **Change date**: 2029-03-16 — after which the code converts to Apache 2.0
